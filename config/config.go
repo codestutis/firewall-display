@@ -12,6 +12,11 @@ type Configuration struct {
 		File string `toml:"file" default:"records.db" validate:"required"` // Path to the MySQL database file
 	} `toml:"database"` // Database configuration
 
+	FirewallInput struct {
+		Mode       string `toml:"mode" default:"syslog" validate:"required,oneof=syslog ufw_file"`              // Input mode: remote OPNsense syslog or local UFW log file
+		UFWLogFile string `toml:"ufw_log_file" default:"/var/log/ufw.log" validate:"required_if=Mode ufw_file"` // Path to the local UFW log file
+	} `toml:"firewall_input"` // Firewall log input configuration
+
 	SyslogListener struct {
 		Address                     string `toml:"address" default:":5140" validate:"required"`  // Listen address for the syslog listener e.g. ":5140", "
 		MaximumNumberToKeep         int    `toml:"maximum_number_to_keep" default:"100000"`      // Maximum number of records to keep in the database. Older records will be deleted when this limit is exceeded.

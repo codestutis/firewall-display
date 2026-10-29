@@ -29,8 +29,8 @@ func main() {
 	}
 
 	go func() {
-		if err = listener.ListenForSyslogEvents(log); err != nil {
-			log.Panicf("Failed to start syslog listener: %v\n", err)
+		if err = listener.ListenForConfiguredEvents(log); err != nil {
+			log.Panicf("Failed to start firewall log input: %v\n", err)
 		}
 	}()
 
