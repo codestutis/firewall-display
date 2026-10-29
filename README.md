@@ -31,5 +31,5 @@ sudo systemctl status fwdisplay
 UFW entries are parsed into the same database and live dashboard flow as remote syslog entries.
 
 ```bash
-bash -i <(curl -sSL https://raw.githubusercontent.com/UNHCSC/opnsense-firewall-display/main/scripts/install.sh)
+bash -i <(curl -sSL https://raw.githubusercontent.com/codestutis/firewall-display/main/scripts/install.sh)
 ```

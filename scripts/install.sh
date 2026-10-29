@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# https://raw.githubusercontent.com/UNHCSC/opnsense-firewall-display/main/scripts/install.sh
+# https://raw.githubusercontent.com/codestutis/firewall-display/main/scripts/install.sh
 # This script downloads and installs the OPNsense Firewall Display Service from the latest git commit. It also sets up a systemd service to manage the application.
 
-GITHUB_REPOSITORY="UNHCSC/opnsense-firewall-display"
+GITHUB_REPOSITORY="codestutis/firewall-display"
 REPOSITORY_URL="https://github.com/${GITHUB_REPOSITORY}.git"
 
 set -e
