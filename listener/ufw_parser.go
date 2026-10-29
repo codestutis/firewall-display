@@ -12,20 +12,40 @@ import (
 
 // ParseUFWLogLine parses the kernel-style UFW records written to /var/log/ufw.log.
 func ParseUFWLogLine(line string) (*db.FirewallLogEntry, error) {
-	parts := strings.SplitN(strings.TrimSpace(line), " ", 4)
-	if len(parts) < 4 {
+	line = strings.TrimSpace(line)
+	kernelIndex := strings.Index(line, "kernel:")
+	if kernelIndex < 0 {
 		return nil, fmt.Errorf("malformed UFW log line header")
 	}
 
-	timestamp, err := time.Parse(time.RFC3339Nano, parts[0])
-	if err != nil {
-		return nil, fmt.Errorf("invalid UFW timestamp: %w", err)
+	headerFields := strings.Fields(line[:kernelIndex])
+	var timestamp time.Time
+	var hostname string
+	switch {
+	case len(headerFields) == 2:
+		parsed, err := time.Parse(time.RFC3339Nano, headerFields[0])
+		if err != nil {
+			return nil, fmt.Errorf("invalid UFW timestamp: %w", err)
+		}
+		timestamp = parsed
+		hostname = headerFields[1]
+	case len(headerFields) == 4:
+		// Traditional syslog timestamps omit the year and timezone.
+		now := time.Now()
+		timestampText := strings.Join(headerFields[:3], " ") + " " + strconv.Itoa(now.Year())
+		parsed, err := time.ParseInLocation("Jan 2 15:04:05 2006", timestampText, time.Local)
+		if err != nil {
+			return nil, fmt.Errorf("invalid UFW syslog timestamp: %w", err)
+		}
+		if parsed.After(now.Add(24 * time.Hour)) {
+			parsed = parsed.AddDate(-1, 0, 0)
+		}
+		timestamp = parsed
+		hostname = headerFields[3]
+	default:
+		return nil, fmt.Errorf("malformed UFW log line header")
 	}
-	if !strings.HasSuffix(parts[2], "kernel:") {
-		return nil, fmt.Errorf("expected kernel log message")
-	}
-
-	body := strings.TrimSpace(parts[3])
+	body := strings.TrimSpace(line[kernelIndex+len("kernel:"):])
 	if !strings.HasPrefix(body, "[UFW ") {
 		return nil, fmt.Errorf("not a UFW log record")
 	}
@@ -46,7 +66,7 @@ func ParseUFWLogLine(line string) (*db.FirewallLogEntry, error) {
 
 	entry := &db.FirewallLogEntry{
 		HeaderTimestamp: timestamp,
-		HeaderHostname:  parts[1],
+		HeaderHostname:  hostname,
 		HeaderAppName:   "kernel",
 		Rule:            -1,
 		Action:          action,
