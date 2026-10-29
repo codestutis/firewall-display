@@ -52,6 +52,7 @@ export async function initializeDashboard(worldMap) {
             const filteredEntries = historyEntries.filter((entry) => shouldAcceptHistoryEntry(entry, effectiveFilters));
             const remoteIPInfoByAddress = await buildRemoteIPInfoLookup(filteredEntries);
 
+            mapController?.setFilters(effectiveFilters);
             chartsController.setHistory(filteredEntries, remoteIPInfoByAddress, effectiveFilters);
             return effectiveFilters;
         }

@@ -289,6 +289,12 @@ function createArcAnimator(overlay, maxActiveArcs = DEFAULT_MAX_ACTIVE_ARCS) {
             headData.length = 0;
             clearLayers();
         },
+        clear() {
+            arcs.length = 0;
+            pathData.length = 0;
+            headData.length = 0;
+            clearLayers();
+        },
         drawArc(source, target, color = ARC_COLORS.outbound) {
             if (destroyed) {
                 return;
@@ -447,6 +453,9 @@ export function createWorldMap({
         destroy,
         drawArc(source, target, color) {
             drawArc(source, target, color);
+        },
+        clearTraffic() {
+            animator?.clear();
         },
         startDemoTraffic({
             points = DEMO_POINTS,

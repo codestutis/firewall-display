@@ -8,7 +8,7 @@ import {
     getEntryFromPayload,
     getGeolocationFromPayload,
     isNullIslandCoordinate,
-    shouldAcceptEntry
+    shouldAcceptHistoryEntry
 } from "./traffic-events.js";
 
 const MAX_LOGGED_NULL_ISLAND_IPS = 512;
@@ -51,6 +51,7 @@ async function resolveConfiguredSourceCoordinate() {
 
 export async function createLiveTrafficController(worldMap) {
     let homeCoordinate = null;
+    let activeFilters = { interfaces: [] };
     const loggedNullIslandIPs = new Set();
 
     if (CONFIGURED_SOURCE_IP.trim() !== "") {
@@ -101,7 +102,7 @@ export async function createLiveTrafficController(worldMap) {
         const color = getArcColor(entry);
         const direction = getDirection(entry);
 
-        if (!shouldAcceptEntry(entry) || !color || !direction) {
+        if (!shouldAcceptHistoryEntry(entry, activeFilters) || !color || !direction) {
             return;
         }
 
@@ -132,6 +133,12 @@ export async function createLiveTrafficController(worldMap) {
     return {
         destroy() {
             loggedNullIslandIPs.clear();
+        },
+        setFilters(filters = {}) {
+            activeFilters = {
+                interfaces: Array.isArray(filters.interfaces) ? [...filters.interfaces] : []
+            };
+            worldMap.clearTraffic?.();
         },
         ingestPayload
     };
